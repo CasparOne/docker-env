@@ -89,7 +89,7 @@ COPY conf.d/xdebug.ini /usr/local/etc/php/conf.d/
 # mongodb ini
 COPY conf.d/mongodb.ini /usr/local/etc/php/conf.d/
 # redis ini
-COPY config/redis.ini /usr/local/etc/php/conf.d/
+COPY conf.d/redis.ini /usr/local/etc/php/conf.d/
 RUN apk del .build-deps \
     && rm -rf /tmp/* \
     && rm -rf /app \
