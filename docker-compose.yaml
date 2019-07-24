@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  &service-nginx nginx:
+    container_name: *service-nginx
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www
+      - ./log/nginx:/var/log/nginx
+  &service-php-fpm php-fpm:
+    container_name: *service-php-fpm
+    build:
+      context: ./docker/php-fpm
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www
