@@ -1,3 +1,6 @@
+# NGINX Dockerfile
+# author Victor Volodin <dev.@volodin.org>
+# MIT Licence
 FROM nginx:1.17.2-alpine
 
 RUN set -xe \
