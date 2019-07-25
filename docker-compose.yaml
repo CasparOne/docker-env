@@ -1,5 +1,7 @@
 version: "3"
-
+networks:
+  backend-network:
+    driver: bridge
 services:
   &service-nginx nginx:
     container_name: *service-nginx
@@ -9,6 +11,13 @@ services:
     volumes:
       - ./src:/var/www
       - ./log/nginx:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - php-fpm
+    networks:
+      - backend-network
   &service-php-fpm php-fpm:
     container_name: *service-php-fpm
     build:
@@ -16,3 +25,5 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./src:/var/www
+    networks:
+      - backend-network
