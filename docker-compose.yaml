@@ -1,32 +1,49 @@
 version: "3"
 volumes:
-  nginx-volume:
+  redis-data:
+  pg-data:
+  mysql-data:
+  mongodb-data:
 networks:
   backend-network:
     driver: bridge
 services:
+  &service-php-fpm php-fpm:
+    container_name: *service-php-fpm
+    hostname: *service-php-fpm
+    build:
+      context: ./docker/php-fpm
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www:rw
+    networks:
+      - backend-network
+  &service-mysql mysql8:
+    image: mysql:8.0.17
+    container_name: *service-mysql
+    # temporary open ports
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Parol123loraP
+    networks:
+      - backend-network
   &service-nginx nginx:
     container_name: *service-nginx
     build:
       context: ./docker/nginx
       dockerfile: Dockerfile
+    depends_on:
+      - *service-php-fpm
     volumes:
       - ./src:/var/www
       - ./log/nginx:/var/log/nginx
-      - nginx-volume:/etc/nginx/data/
     ports:
       - "80:80"
       - "443:443"
     links:
       - php-fpm
-    networks:
-      - backend-network
-  &service-php-fpm php-fpm:
-    container_name: *service-php-fpm
-    build:
-      context: ./docker/php-fpm
-      dockerfile: Dockerfile
-    volumes:
-      - ./src:/var/www
     networks:
       - backend-network
