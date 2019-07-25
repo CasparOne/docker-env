@@ -1,5 +1,3 @@
-# PHP-FPM Docker file
-
 FROM php:7.3-fpm-alpine3.8
 ENV PHP_MONGO_VERSION 1.5.3
 ENV PHP_REDIS_VERSION 4.2.0
