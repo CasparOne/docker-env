@@ -3,7 +3,20 @@ FROM nginx:1.17.2-alpine
 RUN set -xe \
     && apk add --no-cache --virtual .build-deps \
         curl \
-        gzip
+        gzip \
+        gcc \
+        libc-dev \
+        make \
+        openssl-dev \
+        pcre-dev \
+        zlib-dev \
+        linux-headers \
+        curl \
+        gnupg \
+        libxslt-dev \
+        gd-dev \
+        geoip \
+        nginx-mod-http-geoip
 RUN mkdir -p /etc/nginx/data \
     && curl -sSL -D - -A "Docker" -o /tmp/GeoIP.dat.gz https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz \
     && gunzip -c /tmp/GeoIP.dat.gz > /etc/nginx/data/GeoIP.dat \
