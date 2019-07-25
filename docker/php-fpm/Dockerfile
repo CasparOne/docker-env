@@ -102,3 +102,4 @@ RUN apk del .build-deps \
 # sockets spl standard sybase_ct sysvmsg sysvsem sysvshm tidy tokenizer wddx xml xmlreader xmlrpc xmlwriter xsl zip
 
 WORKDIR /var/www
+CMD ["php-fpm"]
