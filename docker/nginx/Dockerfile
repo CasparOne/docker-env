@@ -16,4 +16,6 @@ RUN mkdir -p /etc/nginx/data \
 
 COPY config/ /etc/nginx/
 
+VOLUME ["/etc/nginx/data/"]
+
 WORKDIR /var/www
