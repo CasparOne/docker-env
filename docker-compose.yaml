@@ -50,6 +50,7 @@ services:
       - *service-mysql
       - *service-redis
   &service-nginx nginx:
+    restart: always
     container_name: *service-nginx
     build:
       context: ./docker/nginx
