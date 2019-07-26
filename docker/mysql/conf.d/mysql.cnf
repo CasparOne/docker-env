@@ -20,11 +20,9 @@ max_binlog_size         = 100M
 init_connect = 'SET collation_connection = utf8mb4_unicode_ci'
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
-collation_connection = utf8mb4_unicode_ci
 default_collation_for_utf8mb4 =  utf8mb4_unicode_ci
 general_log = ON
 general_log_file =  /var/log/mysql/mysql8.log
-
 thread_cache_size       = 128
 
 
