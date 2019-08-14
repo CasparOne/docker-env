@@ -8,16 +8,6 @@ networks:
   backend-network:
     driver: bridge
 services:
-  &service-php-fpm php-fpm:
-    container_name: *service-php-fpm
-    hostname: *service-php-fpm
-    build:
-      context: ./docker/php-fpm
-      dockerfile: Dockerfile
-    volumes:
-      - ./src:/var/www:rw
-    networks:
-      - backend-network
   &service-mysql mysql8:
     container_name: *service-mysql
     hostname: *service-mysql
@@ -28,13 +18,39 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./log/mysql:/var/log/mysql
+      - ./log/mysql:/var/log/mysql:rw
       - mysql-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: Parol123loraP
     networks:
       - backend-network
+  &service-redis redis:
+    container_name: *service-redis
+    image: redis:5.0-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - backend-network
+    volumes:
+      - redis-data:/data:rw
+  &service-php-fpm php-fpm:
+    container_name: *service-php-fpm
+    hostname: *service-php-fpm
+    build:
+      context: ./docker/php-fpm
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www:rw
+    networks:
+      - backend-network
+    links:
+      - *service-mysql
+      - *service-redis
+    depends_on:
+      - *service-mysql
+      - *service-redis
   &service-nginx nginx:
+    restart: always
     container_name: *service-nginx
     build:
       context: ./docker/nginx
@@ -43,11 +59,11 @@ services:
       - *service-php-fpm
     volumes:
       - ./src:/var/www
-      - ./log/nginx:/var/log/nginx
+      - ./log/nginx:/var/log/nginx:rw
     ports:
       - "80:80"
       - "443:443"
     links:
-      - php-fpm
+      - *service-php-fpm
     networks:
       - backend-network
