@@ -1,8 +1,7 @@
 ARG TARGET_PHP_VERSION=7.3.8
-ARG TAGRET_ALPINE_VERSION=3.10
+ARG TARGET_ALPINE_VERSION=3.10
 
-FROM php:${TARGET_PHP_VERSION}-fpm-alpine${TAGRET_ALPINE_VERSION}
-
+FROM php:${TARGET_PHP_VERSION}-cli-alpine${TARGET_ALPINE_VERSION}
 ENV PHP_MONGO_VERSION 1.5.3
 ENV PHP_REDIS_VERSION 5.0.5
 
@@ -79,20 +78,28 @@ RUN set -xe \
         $PECL_EXT \
     && docker-php-ext-enable \
         $PECL_EXT
-# FPM configs
-COPY conf.d/fpm/php-fpm.conf /usr/local/etc/
-COPY conf.d/fpm/pool.d /usr/local/etc/pool.d
+# PHP config
+COPY conf.d/*.ini /usr/local/etc/php/conf.d/
 
-# Php ini file
-COPY conf.d/php.ini /usr/local/etc/php/conf.d/
-# Php7 ini file
-COPY conf.d/php7.ini /usr/local/etc/php/conf.d/
-# xdebug ini
-COPY conf.d/xdebug.ini /usr/local/etc/php/conf.d/
-# mongodb ini
-COPY conf.d/mongodb.ini /usr/local/etc/php/conf.d/
-# redis ini
-COPY conf.d/redis.ini /usr/local/etc/php/conf.d/
+ENV SSH_MODULES \
+    bash git openssh rsync augeas shadow  curl wget
+
+RUN apk add --no-cache \
+        $SSH_MODULES
+
+# SSH Sett up
+RUN deluser $(getent passwd 33 | cut -d: -f1) \
+    && delgroup $(getent group 33 | cut -d: -f1) 2>/dev/null || true \
+    && mkdir -p ~root/.ssh /etc/authorized_keys \
+    && chmod 700 ~root/.ssh/ \
+    && augtool 'set /files/etc/ssh/sshd_config/AuthorizedKeysFile ".ssh/authorized_keys /etc/authorized_keys/%u"' \
+    && echo -e "Port 22\n" >> /etc/ssh/sshd_config \
+    && cp -a /etc/ssh /etc/ssh.cache \
+    && rm -rf /var/cache/apk/*
+
+COPY entry.sh /entry.sh
+
+# Clean up
 RUN apk del .build-deps \
     && rm -rf /tmp/* \
     && rm -rf /app \
@@ -104,5 +111,5 @@ RUN apk del .build-deps \
 # pdo_odbc pdo_pgsql pdo_sqlite pgsql phar posix pspell readline recode reflection session shmop simplexml snmp soap
 # sockets spl standard sybase_ct sysvmsg sysvsem sysvshm tidy tokenizer wddx xml xmlreader xmlrpc xmlwriter xsl zip
 
-WORKDIR /var/www
-CMD ["php-fpm"]
+ENTRYPOINT ["/entry.sh"]
+CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config"]

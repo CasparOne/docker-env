@@ -49,6 +49,36 @@ services:
     depends_on:
       - *service-mysql
       - *service-redis
+  &service-php-cli php-cli:
+    container_name: *service-php-cli
+    hostname: *service-php-cli
+    build:
+      context: ./docker/php-cli
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www:rw
+      - ./.ssh/id_rsa.pub:/root/.ssh/authorized_keys
+    networks:
+      - backend-network
+    links:
+      - *service-mysql
+      - *service-redis
+    depends_on:
+      - *service-mysql
+      - *service-redis
+      - *service-php-fpm
+    ports:
+      - "2222:22"
+    environment:
+    # see @link https://github.com/CasparOne/docker-sshd
+      #SSH_USERS:
+        #www:48:48
+        #admin:1000:1000
+      SSH_ENABLE_ROOT: "true"
+      #MOTD:
+      #SFTP_MODE: "false"
+      #SFTP_CHROOT: "/data"
+      #GATEWAY_PORTS: "false"
   &service-nginx nginx:
     restart: always
     container_name: *service-nginx
